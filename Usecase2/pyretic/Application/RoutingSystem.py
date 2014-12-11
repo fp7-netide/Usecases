@@ -176,19 +176,19 @@ class RoutingSystem(DynamicPolicy):
 		    	p2 = (match(switch=s2,dstip=self.HostIPs[0]) | match(switch=s2,dstip=self.HostIPs[2])) >> xfwd(port_nos[s2])
 		    	self.add_policy(s1,p1)
 			self.add_policy(s2,p2)
-                        mainBranch[0] = 1 #mainBranch 1 is up
+                        mainBranch[0] = 1 #mainBranch 1 is up (S1-S2)
 		    elif s1==self.SwitchIDs[0] and s2==self.SwitchIDs[2]:
 			p3 = match(switch=s1,dstip=self.HostIPs[4]) >> xfwd(port_nos[s1])
 			p4 = (match(switch=s2,dstip=self.HostIPs[0]) | match(switch=s2,dstip=self.HostIPs[2])) >> xfwd(port_nos[s2])
 			self.add_policy(s1,p3)
 			self.add_policy(s2,p4)
-                        mainBranch[1] = 1 #mainBranch 2 is up
+                        mainBranch[1] = 1 #mainBranch 2 is up (S1-S3)
 	            elif s1==self.SwitchIDs[1] and s2==self.SwitchIDs[2]:
 			p5 = match(switch=s1,dstip=self.HostIPs[4]) >> xfwd(port_nos[s1])
 			p6 = (match(switch=s2,dstip=self.HostIPs[1]) | match(switch=s2,dstip=self.HostIPs[3])) >> xfwd(port_nos[s2])
 			self.add_policy(s1,p5)
 			self.add_policy(s2,p6)
-                        mainBranch[2] = 1 #mainBranch 3 is up
+                        mainBranch[2] = 1 #mainBranch 3 is up (s2-S3)
 		    elif s1==self.SwitchIDs[2] and s2==self.SwitchIDs[3]:
 			p7 = match(switch=s1,dstip=self.HostIPs[4]) >> xfwd(port_nos[s1])
 			p8 = (match(switch=s2,dstip=self.HostIPs[0]) | match(switch=s2,dstip=self.HostIPs[1]) \
@@ -196,7 +196,7 @@ class RoutingSystem(DynamicPolicy):
 			    >> xfwd(port_nos[s2])
 			self.add_policy(s1,p7)
 			self.add_policy(s2,p8)
-                        mainBranch[3] = 1 #mainBranch 4 is up
+                        mainBranch[3] = 1 #mainBranch 4 is up (S3-S4)
 
                 for (s1,s2,port_nos) in self.topology.edges(data=True):
 		    print("  edge: %s %s %s" %(s1,s2,port_nos))
@@ -243,7 +243,8 @@ class RoutingSystem(DynamicPolicy):
 	        for el in self.topology.egress_locations(pkt['switch']):
 		    print("    el: %s -> %s" %(el,el.port_no))
 	            if pkt['inport'] == el.port_no:
-		        self.EgressPolicy = if_(match(dstmac=pkt['srcmac'],switch=pkt['switch']),fwd(pkt['inport']),self.EgressPolicy) 
+		        #self.EgressPolicy = if_(match(dstmac=pkt['srcmac'],switch=pkt['switch']),fwd(pkt['inport']),self.EgressPolicy) #weird MAC for secondary interfaces
+                        self.EgressPolicy = if_(match(dstip=pkt['srcip'],switch=pkt['switch']),fwd(pkt['inport']),self.EgressPolicy) 
 		        print("      self.EgressPolicy: %s" %self.EgressPolicy)
 
             # If switch is backup and not active

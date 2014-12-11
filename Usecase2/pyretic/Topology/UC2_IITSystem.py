@@ -105,12 +105,25 @@ class IITSTopology (Topo):
 
 	### Assign IPs, Masks and Routes to devices
 	def SetIPConfiguration(self, Devices, net):
-		net.get("h1").setIP("10.0.1.11")
-		net.get("h2").setIP("10.0.1.12")
-		net.get("h3").setIP("10.0.1.13")
-		net.get("h4").setIP("10.0.1.14")
-        	net.get("h5").setIP("10.0.1.15")
 
+		## Internal configuration for Mininet (so that pingall and other Mininet's commands work ok and use correct IPs and so)
+		#net.get("h1").setIP("10.0.1.11")		
+		net.get("h1").setIP("10.0.1.11", "24", "h1-eth0")
+		net.get("h1").setIP("10.1.1.11", "24", "h1-eth1")
+                #net.get("h2").setIP("10.0.1.12")
+                net.get("h2").setIP("10.0.1.12", "24", "h2-eth0")
+		net.get("h2").setIP("10.1.1.12", "24", "h2-eth1")
+		#net.get("h3").setIP("10.0.1.13", "24")
+		net.get("h3").setIP("10.0.1.13", "24", "h3-eth0")
+		net.get("h3").setIP("10.1.1.13", "24", "h3-eth1")
+		#net.get("h4").setIP("10.0.1.14", "24")
+		net.get("h4").setIP("10.0.1.14", "24", "h4-eth0")
+		net.get("h4").setIP("10.1.1.14", "24", "h4-eth1")
+        	#net.get("h5").setIP("10.0.1.15", "24")
+		net.get("h5").setIP("10.0.1.15", "24", "h5-eth0")
+		net.get("h5").setIP("10.1.1.15", "24", "h5-eth1")
+
+		## Hosts configuration (ipconfig/ifconfig)
 		try:
 			with open(IPCONFIG, 'r') as f:
 				for command in f:
@@ -122,7 +135,7 @@ class IITSTopology (Topo):
 						if token[0] == host.name:
 							for tok in token[1:len(token)]:
 								tok.replace("\n", "")
-								host.popen(tok)
+								host.popen(tok) #popen() opens a process by creating a pipe, forking, and invoking the shell
 							break
 
 				logger.info('Successfully enforced initial ip settings to the UC topology')
@@ -162,7 +175,7 @@ def UC2_IITS_Network():
 	# Start mininet and load the topology
 	net = Mininet( topo=IITSTopo, controller=RemoteController, autoSetMacs = True )
 	net.start()
-	setLogLevel( 'debug' ) #setLogLevel( 'info' | 'debug' | 'output' )
+	setLogLevel( 'info' ) #setLogLevel( 'info' | 'debug' | 'output' )
 
 	# Get the devices
 	Devices = dict()
