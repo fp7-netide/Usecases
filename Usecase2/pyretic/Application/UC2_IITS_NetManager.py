@@ -16,7 +16,7 @@
 
 ###############################################################################################
 ###        Name: UC2_IITS_NetManager.py
-###      Author: Elisa Rojas - elisa.rojas@imdea.org
+###      Author: Elisa Rojas - elisa.rojas@telcaria.com
 ### Description: Pyretic Implementation of NetIDE UC2 - Main Module
 ###############################################################################################
 
@@ -66,8 +66,8 @@ class UC2_IITS_NetManager(DynamicPolicy):
 		RS  = RoutingSystem(self.SwitchIDs, self.HostIPs) # self.LB_Device, self.ClientIPs, self.ServerIPs, self.PublicIP
 
 		self.policy = 	(
-					( ARPPkt >> mac_learner() ) +				# ARP - L2 Learning Switches
-					 RS +         				                # Routing System
+					#( ARPPkt >> mac_learner() ) +				# ARP - L2 Learning Switches
+					RS +         				                # Routing System
 					Monitor(MonitoringInterval)				# Monitoring
 				)
 

@@ -14,7 +14,7 @@
 
 ###############################################################################################
 ###        Name: Commons.py
-###      Author: Elisa Rojas - elisa.rojas@imdea.org
+###      Author: Elisa Rojas - elisa.rojas@telcaria.com
 ### Description: Global variables for Pyretic Modules
 ###############################################################################################
 

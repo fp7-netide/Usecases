@@ -17,7 +17,7 @@
 
 ###############################################################################################
 ###        Name: UC2_IITSystem.py
-###      Author: Elisa Rojas - elisa.rojas@imdea.org
+###      Author: Elisa Rojas - elisa.rojas@telcaria.com
 ### Description: NetIDE UC2 Topology
 ###############################################################################################
 
@@ -64,17 +64,34 @@ class IITSTopology (Topo):
 		H4        = self.addHost('h4')
 		H5        = self.addHost('h5')
 
+		# Hypervisors
+		HH1        = self.addSwitch('s11')
+		HH2        = self.addSwitch('s12')
+                HH3        = self.addSwitch('s13')
+		HH4        = self.addSwitch('s14')
+                HH5	   = self.addSwitch('s15')
+
 		# Add links
-       		#from down hosts (H1,H2,H3,H4) to SW1 and SW2
-		self.addLink(H1,         SW1)
-		self.addLink(H1,        SW1b)
-        	self.addLink(H3,         SW1)
-		self.addLink(H3,        SW1b)
-        	self.addLink(H2,         SW2)
-		self.addLink(H2,        SW2b)
-        	self.addLink(H4,         SW2)
-		self.addLink(H4,        SW2b)
-        	#from SW3 to SW1 and SW2
+                #from hosts (H1,H2,H3,H4) to hosts-hypervisors (HH1,HH2,HH3,HH4)
+       		#from down hosts-hypervisors (HH1,HH2,HH3,HH4) to SW1 and SW2
+		self.addLink(H1,         HH1)
+        	self.addLink(H3,         HH3)
+		self.addLink(H2,         HH2)
+        	self.addLink(H4,         HH4)
+		self.addLink(H5,         HH5)
+       		#from hosts-hypervisors (HH1,HH2,HH3,HH4) to SW1, SW2 and SW4
+		self.addLink(HH1,         SW1)
+		self.addLink(HH1,        SW1b)
+        	self.addLink(HH3,         SW1)
+		self.addLink(HH3,        SW1b)
+        	self.addLink(HH2,         SW2)
+		self.addLink(HH2,        SW2b)
+        	self.addLink(HH4,         SW2)
+		self.addLink(HH4,        SW2b)
+                self.addLink(HH5,         SW4)
+		self.addLink(HH5,        SW4b)
+        	
+                #from SW3 to SW1 and SW2
         	self.addLink(SW3,        SW1)
 		self.addLink(SW3,       SW1b)
         	self.addLink(SW3,        SW2)
@@ -88,10 +105,6 @@ class IITSTopology (Topo):
 		self.addLink(SW3,       SW4b)
         	self.addLink(SW3b,       SW4)
 		self.addLink(SW3b,      SW4b)
-        	#from SW4 to host H5
-		self.addLink(SW4,         H5)
-        	self.addLink(SW4b,        H5)
-
 		#between peers
 		self.addLink(SW1,        SW2)
 		self.addLink(SW1b,      SW2b)
@@ -107,21 +120,21 @@ class IITSTopology (Topo):
 	def SetIPConfiguration(self, Devices, net):
 
 		## Internal configuration for Mininet (so that pingall and other Mininet's commands work ok and use correct IPs and so)
-		#net.get("h1").setIP("10.0.1.11")		
-		net.get("h1").setIP("10.0.1.11", "24", "h1-eth0")
-		net.get("h1").setIP("10.1.1.11", "24", "h1-eth1")
-                #net.get("h2").setIP("10.0.1.12")
-                net.get("h2").setIP("10.0.1.12", "24", "h2-eth0")
-		net.get("h2").setIP("10.1.1.12", "24", "h2-eth1")
-		#net.get("h3").setIP("10.0.1.13", "24")
-		net.get("h3").setIP("10.0.1.13", "24", "h3-eth0")
-		net.get("h3").setIP("10.1.1.13", "24", "h3-eth1")
-		#net.get("h4").setIP("10.0.1.14", "24")
-		net.get("h4").setIP("10.0.1.14", "24", "h4-eth0")
-		net.get("h4").setIP("10.1.1.14", "24", "h4-eth1")
-        	#net.get("h5").setIP("10.0.1.15", "24")
-		net.get("h5").setIP("10.0.1.15", "24", "h5-eth0")
-		net.get("h5").setIP("10.1.1.15", "24", "h5-eth1")
+		net.get("h1").setIP("10.0.1.11")		
+		#net.get("h1").setIP("10.0.1.11", "24", "h1-eth0")
+		#net.get("h1").setIP("10.1.1.11", "24", "h1-eth1")
+                net.get("h2").setIP("10.0.1.12")
+                #net.get("h2").setIP("10.0.1.12", "24", "h2-eth0")
+		#net.get("h2").setIP("10.1.1.12", "24", "h2-eth1")
+		net.get("h3").setIP("10.0.1.13", "24")
+		#net.get("h3").setIP("10.0.1.13", "24", "h3-eth0")
+		#net.get("h3").setIP("10.1.1.13", "24", "h3-eth1")
+		net.get("h4").setIP("10.0.1.14", "24")
+		#net.get("h4").setIP("10.0.1.14", "24", "h4-eth0")
+		#net.get("h4").setIP("10.1.1.14", "24", "h4-eth1")
+        	net.get("h5").setIP("10.0.1.15", "24")
+		#net.get("h5").setIP("10.0.1.15", "24", "h5-eth0")
+		#net.get("h5").setIP("10.1.1.15", "24", "h5-eth1")
 
 		## Hosts configuration (ipconfig/ifconfig)
 		try:

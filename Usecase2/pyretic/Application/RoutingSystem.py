@@ -16,7 +16,7 @@
 
 ###############################################################################################
 ###        Name: RoutingSystem.py
-###      Author: Elisa Rojas - elisa.rojas@imdea.org
+###      Author: Elisa Rojas - elisa.rojas@telcaria.com
 ### Description: Routing System for the UC2 (TODO: Still to be improved)
 ###############################################################################################
 
@@ -47,7 +47,7 @@ class RoutingSystem(DynamicPolicy):
             self.nSwitch        = len(SwitchIDs)
             self.nHost          = len(HostIPs)
 
-	    self.SwitchPolicies = [None, None, None, None, None, None, None, None]
+	    self.SwitchPolicies = [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None] #s1-s8[1-8]=switches, s11-s15[11-15]=hypervisors
 	    self.EgressPolicy = drop
 		 
             self.set_initial_state()
@@ -59,9 +59,8 @@ class RoutingSystem(DynamicPolicy):
 	    self.query.register_callback(self.RoutingSystemPolicy) # Handle events using callback function
             self.forward = flood() # Initially floods all packet via ST #identity - return all packets (unmodified), which will later go to mac_learner
          
-	    # Capture all packets but ARP ones
-	    #self.all_packets = ~match(ethtype=ARP_TYPE) >> self.query
-            self.all_packets = identity >> self.query #takes all packets, but only non ARP packets are routed following the system and ARP packets are just used for learning egress locations and updating their routing policies
+	    # Capture all packets
+            self.all_packets = identity >> self.query
 
 	    self.update_policy()
 
@@ -100,7 +99,7 @@ class RoutingSystem(DynamicPolicy):
 	    return true
 
 	def add_policy(self,switch,policy):
-            print("[Routing System]: add_policy")
+            print("[Routing System]: add_policy for switch %s" %switch)
 	    """Update policy for a specific switch"""
 	    if self.SwitchPolicies[switch] is None:
 		self.SwitchPolicies[switch] = policy
@@ -127,7 +126,7 @@ class RoutingSystem(DynamicPolicy):
 		    	self.forward = self.forward + policy
 		#If policy is None -> discard packets (i.e. no policy added to main policy)
 
-	    self.policy = if_(~match(ethtype=ARP_TYPE),self.forward,drop) + self.all_packets #we just forward non ARP packets (ARP packets are dropped, since they are just used for learning egress locations)
+	    self.policy = self.forward + self.all_packets #we just forward non ARP packets (ARP packets are dropped, since they are just used for learning egress locations)
 	    print("  self.policy %s" %self.policy)
 
     	def set_network(self,network):
@@ -158,11 +157,12 @@ class RoutingSystem(DynamicPolicy):
 		"""Update network state"""
 		self.reset_network_state()
         	for switch in self.topology.nodes():
-		    self.SwitchStates[switch-1][0] = 1 #If the switch is active, becomes UP (1)
+                    if switch < 10: #If switch is part of the topology and not a "host hypervisor"
+		        self.SwitchStates[switch-1][0] = 1 #If the switch is active, becomes UP (1)
 		dr = self.default_routing()
 
 		"""Reset all switch policies"""
-                self.SwitchPolicies = [None, None, None, None, None, None, None, None]
+                self.SwitchPolicies = [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None]
 		mainBranch = [0, 0, 0, 0] #default routing has 4 main branches to distribute all the traffic, if some of them is down (either link's down or switch's down), we should add an alternative route 
 
 
@@ -196,8 +196,8 @@ class RoutingSystem(DynamicPolicy):
 			    >> xfwd(port_nos[s2])
 			self.add_policy(s1,p7)
 			self.add_policy(s2,p8)
-                        mainBranch[3] = 1 #mainBranch 4 is up (S3-S4)
-
+                        mainBranch[3] = 1 #mainBranch 4 is up (S3-S4) 
+		
                 for (s1,s2,port_nos) in self.topology.edges(data=True):
 		    print("  edge: %s %s %s" %(s1,s2,port_nos))
 
@@ -221,6 +221,58 @@ class RoutingSystem(DynamicPolicy):
 			    self.add_policy(s1,p5)
 			    self.add_policy(s2,p6)
 
+                #Manually adding routes for hypervisors (hypervisors-switches links - "external")
+                for (s1,s2,port_nos) in self.topology.edges(data=True):
+		    #Default routing
+	            if self.default_routing():
+                        if s1==self.SwitchIDs[0] and s2==11: #HH1
+	                    p11 = match(switch=s1,dstip=self.HostIPs[0]) >> xfwd(port_nos[s1])
+                            p12 = (match(switch=s2,dstip=self.HostIPs[1]) | match(switch=s2,dstip=self.HostIPs[2]) \
+                                 | match(switch=s2,dstip=self.HostIPs[3]) | match(switch=s2,dstip=self.HostIPs[4])) \
+                                 >> xfwd(port_nos[s2])
+                            self.add_policy(s1,p11)
+			    self.add_policy(s2,p12)
+                        if s1==self.SwitchIDs[1] and s2==12: #HH2
+	                    p13 = match(switch=s1,dstip=self.HostIPs[1]) >> xfwd(port_nos[s1])
+                            p14 = (match(switch=s2,dstip=self.HostIPs[0]) | match(switch=s2,dstip=self.HostIPs[2]) \
+                                 | match(switch=s2,dstip=self.HostIPs[3]) | match(switch=s2,dstip=self.HostIPs[4])) \
+                                 >> xfwd(port_nos[s2])
+                            self.add_policy(s1,p13)
+			    self.add_policy(s2,p14)
+                        if s1==self.SwitchIDs[0] and s2==13: #HH3
+	                    p15 = match(switch=s1,dstip=self.HostIPs[2]) >> xfwd(port_nos[s1])
+                            p16 = (match(switch=s2,dstip=self.HostIPs[0]) | match(switch=s2,dstip=self.HostIPs[1]) \
+                                 | match(switch=s2,dstip=self.HostIPs[3]) | match(switch=s2,dstip=self.HostIPs[4])) \
+                                 >> xfwd(port_nos[s2])
+                            self.add_policy(s1,p15)
+			    self.add_policy(s2,p16)
+                        if s1==self.SwitchIDs[1] and s2==14: #HH4
+	                    p15 = match(switch=s1,dstip=self.HostIPs[3]) >> xfwd(port_nos[s1])
+                            p16 = (match(switch=s2,dstip=self.HostIPs[0]) | match(switch=s2,dstip=self.HostIPs[1]) \
+                                 | match(switch=s2,dstip=self.HostIPs[2]) | match(switch=s2,dstip=self.HostIPs[4])) \
+                                 >> xfwd(port_nos[s2])
+                            self.add_policy(s1,p15)
+			    self.add_policy(s2,p16)
+                        if s1==self.SwitchIDs[3] and s2==15: #HH5
+	                    p17 = match(switch=s1,dstip=self.HostIPs[4]) >> xfwd(port_nos[s1])
+                            p18 = (match(switch=s2,dstip=self.HostIPs[0]) | match(switch=s2,dstip=self.HostIPs[1]) \
+                                 | match(switch=s2,dstip=self.HostIPs[2]) | match(switch=s2,dstip=self.HostIPs[3])) \
+                                 >> xfwd(port_nos[s2])
+                            self.add_policy(s1,p17)
+			    self.add_policy(s2,p18)
+
+                    #Non-default routing ###REVISAR
+                    #if mainBranch[0] == 0:
+
+                #Manually adding routes for hypervisors (hypervisors-host links - "internal")
+	        #egress = "%s[%s]" %(pkt['switch'],pkt['inport'])
+	        #print("  egress: %s -> %s" %(egress,self.topology.egress_locations(pkt['switch'])))
+		for sw in [11, 12, 13, 14, 15]:
+	            for el in self.topology.egress_locations(sw):
+		        print("    el: %s -> %s" %(el,el.port_no))
+		        #self.EgressPolicy = if_(match(dstmac=pkt['srcmac'],switch=pkt['switch']),fwd(pkt['inport']),self.EgressPolicy) #weird MAC for secondary interfaces
+                        self.EgressPolicy = if_(match(dstip=self.HostIPs[sw-11],switch=sw),fwd(el.port_no),self.EgressPolicy) 
+		        print("      self.EgressPolicy: %s" %self.EgressPolicy)
 
 
 		self.update_policy()	
@@ -237,32 +289,8 @@ class RoutingSystem(DynamicPolicy):
             elif pkt['ethtype'] == ARP_TYPE:
 	        print "  ARP packet"
 
-                """Update policy with MAC learning for egress locations (host-switch routing)"""
-	        #egress = "%s[%s]" %(pkt['switch'],pkt['inport'])
-	        #print("  egress: %s -> %s" %(egress,self.topology.egress_locations(pkt['switch'])))
-	        for el in self.topology.egress_locations(pkt['switch']):
-		    print("    el: %s -> %s" %(el,el.port_no))
-	            if pkt['inport'] == el.port_no:
-		        #self.EgressPolicy = if_(match(dstmac=pkt['srcmac'],switch=pkt['switch']),fwd(pkt['inport']),self.EgressPolicy) #weird MAC for secondary interfaces
-                        self.EgressPolicy = if_(match(dstip=pkt['srcip'],switch=pkt['switch']),fwd(pkt['inport']),self.EgressPolicy) 
-		        print("      self.EgressPolicy: %s" %self.EgressPolicy)
-
-            # If switch is backup and not active
-            if SwitchID in self.SwitchIDs:
-                SwitchIndex = self.SwitchIDs.index(SwitchID)
-
-		# If "backup" switch, we first need to know if the other switch is not available, otherwise, discard packet
-                if SwitchIndex >= self.nSwitch/2 and self.SwitchStates[SwitchIndex-self.nSwitch/2][0]: 
-                    print("[Routing System]: Discarding packet...")
-
-		# If not "backup" or "backup" active (because the other switch is not available)
-
-            else:
-                print("[Routing System]: inconsistency ERROR!")
-                return
 	   
-	    self.update_policy()
-
+	    #self.update_policy()
             #print("  self.topology: %s" %self.topology)
 
 
