@@ -89,20 +89,15 @@ public class ElementsConfigurator implements IFloodlightModule, IOFSwitchListene
 	@Override
 	public void addedSwitch(IOFSwitch sw) {
 		if (sw.getStringId().equalsIgnoreCase("00:00:00:00:00:00:00:01")) {
-			//clearFlowMods(sw);
 			configureRouter(sw);		
 		}	
 		else if (sw.getStringId().equalsIgnoreCase("00:00:00:00:00:00:00:04")) {
-			System.out.println("Clearing flow mods");
-			//clearFlowMods(sw);
 			configureFW1(sw);			
 		}
 		else if (sw.getStringId().equalsIgnoreCase("00:00:00:00:00:00:00:05")){
-			//clearFlowMods(sw);
 			configureFW2(sw);
 		}
 		else {
-			//clearFlowMods(sw);
 			addDefaultAllow(sw);
 		}
 	}
