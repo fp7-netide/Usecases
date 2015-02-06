@@ -78,19 +78,6 @@ class RoutingSystem(DynamicPolicy):
 	    self.SwitchStates = [self.SW1State, self.SW2State, self.SW3State, self.SW4State, 
 				self.SW1bState, self.SW2bState, self.SW3bState, self.SW4bState] 
 
-	    """
-            self.SW1State = [1, [1, 1, 1, 1, 1, 1, 1, 1, 1]]
-            self.SW2State = [1, [1, 1, 1, 1, 1, 1, 1, 1, 1]]
-            self.SW3State = [1, [1, 1, 1, 1, 1, 1, 1, 1, 1]]
-            self.SW4State = [1, [1, 1, 1, 1, 1, 1, 1, 1, 1]]
-            self.SW1bState = [1, [1, 1, 1, 1, 1, 1, 1, 1, 1]]
-       	    self.SW2bState = [1, [1, 1, 1, 1, 1, 1, 1, 1, 1]]
-            self.SW3bState = [1, [1, 1, 1, 1, 1, 1, 1, 1, 1]]
-            self.SW4bState = [1, [1, 1, 1, 1, 1, 1, 1, 1, 1]]
-	    self.SwitchStates = [self.SW1State, self.SW2State, self.SW3State, self.SW4State, 
-				self.SW1bState, self.SW2bState, self.SW3bState, self.SW4bState] 
-	    """
-
 	def default_routing(self):
 	    """Returns 'true' if the network uses default routing (no faulty links/switches)"""
 	    for state in self.SwitchStates:
@@ -159,9 +146,9 @@ class RoutingSystem(DynamicPolicy):
         	for switch in self.topology.nodes():
                     if switch < 10: #If switch is part of the topology and not a "host hypervisor"
 		        self.SwitchStates[switch-1][0] = 1 #If the switch is active, becomes UP (1)
-		dr = self.default_routing()
 
 		"""Reset all switch policies"""
+                self.EgressPolicy = drop
                 self.SwitchPolicies = [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None]
 		mainBranch = [0, 0, 0, 0] #default routing has 4 main branches to distribute all the traffic, if some of them is down (either link's down or switch's down), we should add an alternative route 
 
@@ -177,7 +164,7 @@ class RoutingSystem(DynamicPolicy):
 		    	self.add_policy(s1,p1)
 			self.add_policy(s2,p2)
                         mainBranch[0] = 1 #mainBranch 1 is up (S1-S2)
-		    elif s1==self.SwitchIDs[0] and s2==self.SwitchIDs[2]:
+		    elif s1==self.SwitchIDs[0] and s2==self.SwitchIDs[2]: ###ERS
 			p3 = match(switch=s1,dstip=self.HostIPs[4]) >> xfwd(port_nos[s1])
 			p4 = (match(switch=s2,dstip=self.HostIPs[0]) | match(switch=s2,dstip=self.HostIPs[2])) >> xfwd(port_nos[s2])
 			self.add_policy(s1,p3)
@@ -201,30 +188,114 @@ class RoutingSystem(DynamicPolicy):
                 for (s1,s2,port_nos) in self.topology.edges(data=True):
 		    print("  edge: %s %s %s" %(s1,s2,port_nos))
 
-                    #Non-default routing ###REVISAR (hay más opciones de caídas por cada enlace.......)
-                    if mainBranch[0] == 0:
+                    #Non-default routing ###TODO (more options of down links to handle.......)
+                    if mainBranch[0] == 0: #S1-S2 DOWN
                         if s1==self.SwitchIDs[4] and s2==self.SwitchIDs[5]:
                             p1 = (match(switch=s1,dstip=self.HostIPs[1]) | match(switch=s1,dstip=self.HostIPs[3])) >> xfwd(port_nos[s1])
 		    	    p2 = (match(switch=s2,dstip=self.HostIPs[0]) | match(switch=s2,dstip=self.HostIPs[2])) >> xfwd(port_nos[s2])
 		    	    self.add_policy(s1,p1)
 			    self.add_policy(s2,p2)
-                    if mainBranch[1] == 0:
-		        if s1==self.SwitchIDs[4] and s2==self.SwitchIDs[2]: 
-			    p3 = match(switch=s1,dstip=self.HostIPs[4]) >> xfwd(port_nos[s1])
-			    p4 = (match(switch=s2,dstip=self.HostIPs[0]) | match(switch=s2,dstip=self.HostIPs[2])) >> xfwd(port_nos[s2])
-			    self.add_policy(s1,p3)
-			    self.add_policy(s2,p4)
-                    if mainBranch[2] == 0:
-	                if s1==self.SwitchIDs[5] and s2==self.SwitchIDs[2]:
-			    p5 = match(switch=s1,dstip=self.HostIPs[4]) >> xfwd(port_nos[s1])
-			    p6 = (match(switch=s2,dstip=self.HostIPs[1]) | match(switch=s2,dstip=self.HostIPs[3])) >> xfwd(port_nos[s2])
-			    self.add_policy(s1,p5)
-			    self.add_policy(s2,p6)
+                        if s1==self.SwitchIDs[2] and s2==self.SwitchIDs[4]: ###ERS
+			    p3 = match(switch=s2,dstip=self.HostIPs[4]) >> xfwd(port_nos[s2])
+			    p4 = (match(switch=s1,dstip=self.HostIPs[0]) | match(switch=s1,dstip=self.HostIPs[2])) >> xfwd(port_nos[s1])
+			    self.add_policy(s2,p3)
+			    self.add_policy(s1,p4)
+                        if s1==self.SwitchIDs[2] and s2==self.SwitchIDs[5]: ###ERS
+			    p5 = match(switch=s2,dstip=self.HostIPs[4]) >> xfwd(port_nos[s2])
+			    p6 = (match(switch=s1,dstip=self.HostIPs[1]) | match(switch=s1,dstip=self.HostIPs[3])) >> xfwd(port_nos[s1])
+			    self.add_policy(s2,p5)
+			    self.add_policy(s1,p6)
+                    if mainBranch[1] == 0: #S1-S3 DOWN
+		        if s1==self.SwitchIDs[0] and s2==self.SwitchIDs[6]: 
+			    p11 = match(switch=s1,dstip=self.HostIPs[4]) >> xfwd(port_nos[s1])
+			    p12 = (match(switch=s2,dstip=self.HostIPs[0]) | match(switch=s2,dstip=self.HostIPs[2])) >> xfwd(port_nos[s2])
+			    self.add_policy(s1,p11)
+			    self.add_policy(s2,p12)
+	                if s1==self.SwitchIDs[3] and s2==self.SwitchIDs[6]:
+			    p13 = match(switch=s2,dstip=self.HostIPs[4]) >> xfwd(port_nos[s2])
+			    p14 = (match(switch=s1,dstip=self.HostIPs[0]) | match(switch=s1,dstip=self.HostIPs[1]) \
+			        | match(switch=s1,dstip=self.HostIPs[2]) | match(switch=s1,dstip=self.HostIPs[3])) \
+			        >> xfwd(port_nos[s1])
+			    self.add_policy(s2,p13)
+			    self.add_policy(s1,p14)
+                    if mainBranch[2] == 0: #S2-S3 UP
+	                if s1==self.SwitchIDs[1] and s2==self.SwitchIDs[6]: 
+			    p21 = match(switch=s1,dstip=self.HostIPs[4]) >> xfwd(port_nos[s1])
+			    p22 = (match(switch=s2,dstip=self.HostIPs[1]) | match(switch=s2,dstip=self.HostIPs[3])) >> xfwd(port_nos[s2])
+			    self.add_policy(s1,p21)
+			    self.add_policy(s2,p22)
+	                if s1==self.SwitchIDs[3] and s2==self.SwitchIDs[6]:
+			    p23 = match(switch=s2,dstip=self.HostIPs[4]) >> xfwd(port_nos[s2])
+			    p24 = (match(switch=s1,dstip=self.HostIPs[0]) | match(switch=s1,dstip=self.HostIPs[1]) \
+			        | match(switch=s1,dstip=self.HostIPs[2]) | match(switch=s1,dstip=self.HostIPs[3])) \
+			        >> xfwd(port_nos[s1])
+			    self.add_policy(s2,p23)
+			    self.add_policy(s1,p24)
+                    if mainBranch[3] == 0: #S3-S4 DOWN
+	                if s1==self.SwitchIDs[2] and s2==self.SwitchIDs[7]:
+			    p31 = match(switch=s1,dstip=self.HostIPs[4]) >> xfwd(port_nos[s1])
+			    p32 = (match(switch=s2,dstip=self.HostIPs[0]) | match(switch=s2,dstip=self.HostIPs[1]) \
+			        | match(switch=s2,dstip=self.HostIPs[2]) | match(switch=s2,dstip=self.HostIPs[3])) \
+			        >> xfwd(port_nos[s2])
+			    self.add_policy(s1,p31)
+			    self.add_policy(s2,p32)
 
                 #Manually adding routes for hypervisors (hypervisors-switches links - "external")
                 for (s1,s2,port_nos) in self.topology.edges(data=True):
-		    #Default routing
-	            if self.default_routing():
+                    
+                    #Default routing
+                    switch1=self.SwitchIDs[0]
+                    switch2=self.SwitchIDs[1]
+                    switch4=self.SwitchIDs[3]
+                    
+                    #Non-default routing
+                    if mainBranch[0] == 0: #S1-S2 DOWN
+                        switch1=self.SwitchIDs[4]
+                        switch2=self.SwitchIDs[5]
+                    #if mainBranch[1] == 0: #S1-S3 DOWN
+                    #if mainBranch[2] == 0: #S2-S3 DOWN
+                    if mainBranch[3] == 0: #S3-S4 DOWN
+                        switch4=self.SwitchIDs[7]
+
+                    if s1==switch1 and s2==11: #HH1
+	                p11 = match(switch=s1,dstip=self.HostIPs[0]) >> xfwd(port_nos[s1])
+                        p12 = (match(switch=s2,dstip=self.HostIPs[1]) | match(switch=s2,dstip=self.HostIPs[2]) \
+                             | match(switch=s2,dstip=self.HostIPs[3]) | match(switch=s2,dstip=self.HostIPs[4])) \
+                             >> xfwd(port_nos[s2])
+                        self.add_policy(s1,p11)
+			self.add_policy(s2,p12)
+                    if s1==switch2 and s2==12: #HH2
+	                p13 = match(switch=s1,dstip=self.HostIPs[1]) >> xfwd(port_nos[s1])
+                        p14 = (match(switch=s2,dstip=self.HostIPs[0]) | match(switch=s2,dstip=self.HostIPs[2]) \
+                             | match(switch=s2,dstip=self.HostIPs[3]) | match(switch=s2,dstip=self.HostIPs[4])) \
+                             >> xfwd(port_nos[s2])
+                        self.add_policy(s1,p13)
+			self.add_policy(s2,p14)
+                    if s1==switch1 and s2==13: #HH3
+	                p15 = match(switch=s1,dstip=self.HostIPs[2]) >> xfwd(port_nos[s1])
+                        p16 = (match(switch=s2,dstip=self.HostIPs[0]) | match(switch=s2,dstip=self.HostIPs[1]) \
+                             | match(switch=s2,dstip=self.HostIPs[3]) | match(switch=s2,dstip=self.HostIPs[4])) \
+                             >> xfwd(port_nos[s2])
+                        self.add_policy(s1,p15)
+			self.add_policy(s2,p16)
+                    if s1==switch2 and s2==14: #HH4
+	                p15 = match(switch=s1,dstip=self.HostIPs[3]) >> xfwd(port_nos[s1])
+                        p16 = (match(switch=s2,dstip=self.HostIPs[0]) | match(switch=s2,dstip=self.HostIPs[1]) \
+                             | match(switch=s2,dstip=self.HostIPs[2]) | match(switch=s2,dstip=self.HostIPs[4])) \
+                             >> xfwd(port_nos[s2])
+                        self.add_policy(s1,p15)
+			self.add_policy(s2,p16)
+                    if s1==switch4 and s2==15: #HH5
+	                p17 = match(switch=s1,dstip=self.HostIPs[4]) >> xfwd(port_nos[s1])
+                        p18 = (match(switch=s2,dstip=self.HostIPs[0]) | match(switch=s2,dstip=self.HostIPs[1]) \
+                             | match(switch=s2,dstip=self.HostIPs[2]) | match(switch=s2,dstip=self.HostIPs[3])) \
+                             >> xfwd(port_nos[s2])
+                        self.add_policy(s1,p17)
+			self.add_policy(s2,p18)
+
+                    """
+                    #Check branch by branch to build the routes (mainBranch[0] affects HH1, HH2, HH3 and HH4; mainBranch[3] affects HH5)
+                    if mainBranch[0] == 1: #S1-S2 UP
                         if s1==self.SwitchIDs[0] and s2==11: #HH1
 	                    p11 = match(switch=s1,dstip=self.HostIPs[0]) >> xfwd(port_nos[s1])
                             p12 = (match(switch=s2,dstip=self.HostIPs[1]) | match(switch=s2,dstip=self.HostIPs[2]) \
@@ -253,6 +324,16 @@ class RoutingSystem(DynamicPolicy):
                                  >> xfwd(port_nos[s2])
                             self.add_policy(s1,p15)
 			    self.add_policy(s2,p16)
+                    #else:
+
+
+                    #if mainBranch[1] == 1: #S1-S3 UP
+                    #else:
+
+                    #if mainBranch[2] == 1: #S2-S3 UP
+                    #else:
+
+                    if mainBranch[3] == 1: #S3-S4 UP
                         if s1==self.SwitchIDs[3] and s2==15: #HH5
 	                    p17 = match(switch=s1,dstip=self.HostIPs[4]) >> xfwd(port_nos[s1])
                             p18 = (match(switch=s2,dstip=self.HostIPs[0]) | match(switch=s2,dstip=self.HostIPs[1]) \
@@ -260,9 +341,9 @@ class RoutingSystem(DynamicPolicy):
                                  >> xfwd(port_nos[s2])
                             self.add_policy(s1,p17)
 			    self.add_policy(s2,p18)
-
-                    #Non-default routing ###REVISAR
-                    #if mainBranch[0] == 0:
+                    #else:
+                    """
+                   
 
                 #Manually adding routes for hypervisors (hypervisors-host links - "internal")
 	        #egress = "%s[%s]" %(pkt['switch'],pkt['inport'])
@@ -272,7 +353,7 @@ class RoutingSystem(DynamicPolicy):
 		        print("    el: %s -> %s" %(el,el.port_no))
 		        #self.EgressPolicy = if_(match(dstmac=pkt['srcmac'],switch=pkt['switch']),fwd(pkt['inport']),self.EgressPolicy) #weird MAC for secondary interfaces
                         self.EgressPolicy = if_(match(dstip=self.HostIPs[sw-11],switch=sw),fwd(el.port_no),self.EgressPolicy) 
-		        print("      self.EgressPolicy: %s" %self.EgressPolicy)
+		        #print("      self.EgressPolicy: %s" %self.EgressPolicy)
 
 
 		self.update_policy()	
