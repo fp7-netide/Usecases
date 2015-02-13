@@ -17,7 +17,7 @@ The operation will be declared a success if the code can run seamlessly on the t
 
 ###Illustration
 
-![UC3 illustration](https://github.com/fp7-netide/PoC/blob/development/use_cases/use_case_3/topology.png)
+![UC3 illustration](https://github.com/fp7-netide/Usecases/blob/development/Usecase3/topology.png)
 
 ###Details
 
