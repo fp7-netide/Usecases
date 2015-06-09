@@ -225,7 +225,9 @@ public class Monitor implements IFloodlightModule, IMonitorService , IOFMessageL
 				/**
 				 * Latest floodlight version must use this :
 				 */
-				lp.deserializeLatencyPacket(MonitorUtils.getEthPayload(eth.getPayload().serialize()));
+				lp.deserializeLatencyPacket(eth.getPayload().serialize());
+				//lp.deserializeLatencyPacket(MonitorUtils.getEthPayload(eth.getPayload().serialize()));
+				
 				if(lp.getId()!=Long.valueOf(controllerid)){
 					// This packet comes from another controller
 					if(lp.getOpCode()==(short) 0){ // This is a latency request => send a reply
@@ -292,7 +294,7 @@ public class Monitor implements IFloodlightModule, IMonitorService , IOFMessageL
 					try{
 						double rttSrc = 0;
 						double rttDst = 0;
-						IOFSwitch swSrc = floodlightProvider.getAllSwitchMap().get(lp.getSwitch());
+						IOFSwitch swSrc = floodlightProvider.getSwitches().get(lp.getSwitch());
 						rttSrc = (getSwitchContainer(swSrc.getId()).getStatsLatList().get(getSwitchContainer(swSrc.getId()).getStatsLatList().size()-1)/2)/1000000; // approximation 
 						rttDst = (getSwitchContainer(sw.getId()).getStatsLatList().get(getSwitchContainer(sw.getId()).getStatsLatList().size()-1)/2)/1000000; // approximation 
 						double time = now - lp.getTimestamp() - (now - lp.getTimestamp()-rttSrc<0?0:rttSrc)-(now - lp.getTimestamp()-rttDst<0?0:rttDst);

@@ -154,9 +154,9 @@ public class MonitorResource extends ServerResource {
 				ArrayList<Route> routes = new ArrayList<Route>();
 				if(multiple) {
 					// not implemented yet
-					routes = r.getRoutes(Long.valueOf(s1), Long.valueOf(s2), true);
+					//routes = r.getRoute(Long.valueOf(s1), Long.valueOf(s2), true);
 				} else{
-					routes.add(r.getRoute(Long.valueOf(s1), Long.valueOf(s2),0));
+					routes.add(r.getRoute(Long.valueOf(s1), Long.valueOf(s2)));
 				}
 				if(routes.isEmpty())
 					return new ErrorContainer(54, "RouteError", "No route found.");

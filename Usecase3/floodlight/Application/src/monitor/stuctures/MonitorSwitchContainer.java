@@ -7,10 +7,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.floodlightcontroller.core.ImmutablePort;
 import net.floodlightcontroller.monitor.internal.Monitor;
 
 import org.openflow.protocol.OFMatch;
+import org.openflow.protocol.OFPhysicalPort;
 import org.openflow.protocol.statistics.OFStatistics;
 
 /**
@@ -53,8 +53,8 @@ public class MonitorSwitchContainer {
 	public MonitorSwitchContainer(Monitor m,long sw) {
 		this.m=m;
 		this.sw=sw;
-		this.portList = new ArrayList<MonitorPortContainer>(m.getFloodlightProvider().getAllSwitchMap().get(sw).getPorts().size());
-		for(ImmutablePort p : m.getFloodlightProvider().getAllSwitchMap().get(sw).getPorts()){ // creates a MonitorPortContainer per port
+		this.portList = new ArrayList<MonitorPortContainer>(m.getFloodlightProvider().getSwitches().get(sw).getPorts().size());
+		for(OFPhysicalPort p : m.getFloodlightProvider().getSwitches().get(sw).getPorts()){ // creates a MonitorPortContainer per port
 			if(p.getPortNumber()!=-2)
 				portList.add(new MonitorPortContainer(p.getPortNumber()));
 		}
@@ -76,7 +76,7 @@ public class MonitorSwitchContainer {
 	 */
 	public void checkPort(){
 		try{
-			for(ImmutablePort p : m.getFloodlightProvider().getAllSwitchMap().get(sw).getPorts()){
+			for(OFPhysicalPort p : m.getFloodlightProvider().getSwitches().get(sw).getPorts()){
 				if(getPortContainer(p.getPortNumber())==null && p.getPortNumber()!=-2){
 					MonitorPortContainer mpc = new MonitorPortContainer(p.getPortNumber());
 					portList.add(mpc);

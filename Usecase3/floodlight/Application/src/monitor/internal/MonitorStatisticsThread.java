@@ -79,10 +79,10 @@ public class MonitorStatisticsThread extends Thread {
 			Thread.sleep(3000); // let the thread sleep for 3s after init to let the system boot properly
 		} catch (InterruptedException e) {}
 		while (true) {
-			int nbSwitch =  m.floodlightProvider.getAllSwitchMap().keySet().size();
+			int nbSwitch =  m.floodlightProvider.getSwitches().keySet().size();
 			if(nbSwitch!=0){
 				boolean miniSleep = m.statisticsUpdateInterval > nbSwitch;
-				for (IOFSwitch sw : m.floodlightProvider.getAllSwitchMap().values()) {
+				for (IOFSwitch sw : m.floodlightProvider.getSwitches().values()) {
 					if(m.getSwitchContainer(sw.getId())==null){ // updates the switch list
 						MonitorSwitchContainer msc = new MonitorSwitchContainer(m,sw.getId());
 						m.switchList.add(msc);
@@ -165,7 +165,7 @@ public class MonitorStatisticsThread extends Thread {
 		requestLengthPort += specificReqPort.getLength();
 		reqPort.setLengthU(requestLengthPort);
 		try {
-			futurePort = sw.queryStatistics(reqPort);
+			futurePort = sw.getStatistics(reqPort);
 			statsPort = futurePort.get(10, TimeUnit.SECONDS);
 		} catch (Exception e) {
 			m.logger.error("Failure retrieving port statistics from switch "
@@ -188,7 +188,7 @@ public class MonitorStatisticsThread extends Thread {
 		requestLengthFlow += specificReqFlow.getLength();
 		reqFlow.setLengthU(requestLengthFlow);
 		try {
-			futureFlow = sw.queryStatistics(reqFlow);
+			futureFlow = sw.getStatistics(reqFlow);
 			t.start();
 			statsFlow = futureFlow.get(10, TimeUnit.SECONDS);
 			t.stop();
@@ -212,7 +212,7 @@ public class MonitorStatisticsThread extends Thread {
 	 */
 	private void updateInstantaneous() {
 		try {
-			Collection<IOFSwitch> switches = m.floodlightProvider.getAllSwitchMap()
+			Collection<IOFSwitch> switches = m.floodlightProvider.getSwitches()
 					.values();
 			if (!switches.isEmpty()) {
 				for (IOFSwitch sw : switches) {
@@ -230,7 +230,7 @@ public class MonitorStatisticsThread extends Thread {
 								continue;
 							List<Long> list = new ArrayList<Long>();
 							list.add(s.getReceiveBytes()); // 0
-							list.add(s.getReceivePackets()); // 1
+							list.add(s.getreceivePackets()); // 1
 							list.add(s.getReceiveDropped()); // 2
 							list.add(s.getreceiveErrors()); // 3
 							list.add(s.getTransmitBytes()); // 4
@@ -246,7 +246,7 @@ public class MonitorStatisticsThread extends Thread {
 							// Some values are omitted
 							List<Long> list = new ArrayList<Long>();
 							list.add(s.getReceiveBytes()); // 8
-							list.add(s.getReceivePackets()); // 9
+							list.add(s.getreceivePackets()); // 9
 							list.add(s.getReceiveDropped()); // 10
 							list.add(s.getreceiveErrors()); // 11
 							list.add(s.getTransmitBytes()); // 12

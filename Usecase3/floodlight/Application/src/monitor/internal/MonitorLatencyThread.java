@@ -5,13 +5,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.floodlightcontroller.core.IOFSwitch;
-import net.floodlightcontroller.core.ImmutablePort;
 import net.floodlightcontroller.devicemanager.SwitchPort;
 import net.floodlightcontroller.monitor.stuctures.MonitorSwitchContainer;
 import net.floodlightcontroller.packet.Data;
 import net.floodlightcontroller.packet.Ethernet;
 
 import org.openflow.protocol.OFPacketOut;
+import org.openflow.protocol.OFPhysicalPort;
 import org.openflow.protocol.action.OFAction;
 import org.openflow.protocol.action.OFActionOutput;
 
@@ -42,15 +42,15 @@ public class MonitorLatencyThread extends Thread{
 			try{
 				// we use micro sleeps to update the links sequentially instead of all at once 
 				ArrayList<SwitchPort> map = new ArrayList<SwitchPort>();
-				for(IOFSwitch sw : m.floodlightProvider.getAllSwitchMap().values())
-					for(ImmutablePort p : sw.getPorts()){
-						if(p.getPortNumber()!=-2 && !p.isLinkDown()) // if the port is UP and is not the internal port TODO : add device AP check
+				for(IOFSwitch sw : m.floodlightProvider.getSwitches().values())
+					for(OFPhysicalPort p : sw.getPorts()){
+						if(p.getPortNumber()!=-2 && p.getState()==0) // if the port is UP and is not the internal port TODO : add device AP check
 							map.add(new SwitchPort(sw.getId(), p.getPortNumber()));
 					}
 				boolean miniSleep = m.latencyUpdateInterval > map.size();
 				if(map.size()!=0){
 					for(SwitchPort sp : map){
-						getLatency(m.floodlightProvider.getAllSwitchMap().get(sp.getSwitchDPID()), (short) sp.getPort());
+						getLatency(m.floodlightProvider.getSwitches().get(sp.getSwitchDPID()), (short) sp.getPort());
 						/** half-sleep **/
 						if(miniSleep){
 							try {
