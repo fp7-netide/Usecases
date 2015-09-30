@@ -1,0 +1,57 @@
+###################
+UC1 with Pox
+###################
+
+This readme helps the user to run the pox modules designed to manage the UC1 network,
+on top of a Mininet topology.
+
+Quick-start
+	Attention:	You're recommended to use the Mininet or Pyretic VMs. Pox version dart must be 
+				installed at $HOME/pox .
+				Mininet VM can be downloaded from http://mininet.org/download/
+				Pyretic VM can be downloaded from http://frenetic-lang.org/pyretic/
+------------------------------------------------------------------------------------
+
+1) Enter the netide folder: cd $HOME/netide
+2) Start Mininet: ./mininetStart.sh
+3) Start pox: ./poxStart.sh
+4) Start traffic in Mininet to verify the setup.
+	h2 iperf -p 80 -s &		    # Should be unreachable
+	h2 iperf -u -p 53 -s &
+	h3 iperf -p 80 -s &
+	h3 iperf -u -p 53 -s &		# Should be unreachable
+	h4 iperf -p 80 -s &		    # Should be unreachable
+	h4 iperf -u -p 53 -s &		# Should be unreachable
+	pingall
+		# h1 -> X X X
+		# h2 -> h1 h3 X
+		# h3 -> h1 h2 X
+		# h4 -> h1 h2 h3
+
+	# Should fail
+	h3 ping h4
+	# Should pass
+	h4 ping h3
+	# Should pass only during the first 5 seconds after the previous (ICMP rules lifetime is set to 5 seconds)
+	h3 ping h4
+
+	# should work
+	h4 iperf -u -t 5 -p 53 -c 10.0.1.17
+	h4 iperf -t 5 -p 80 -c 10.0.1.18
+	h2 iperf -t 5 -p 80 -c 10.0.1.18
+	h1 iperf -t 5 -p 80 -c 10.0.1.18
+	h1 iperf -u -t 5 -p 53 -c 10.0.1.17
+
+	# should fail
+	h1 iperf -t 5 -p 80 -c 10.0.1.17
+	h1 iperf -u -t 5 -p 53 -c 10.0.1.18
+	h1 iperf -t 5 -p 80 -c 10.0.1.32
+	h2 iperf -u -t 5 -p 53 -c 10.0.1.32
+	h2 iperf -t 5 -p 80 -c 10.0.1.32
+------------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------------
+--- Check Switch rules
+s1 dpctl dump-flows tcp:localhost:6633
+s1 ovs-ofctl dump-flows tcp:127.0.0.1:6633
+------------------------------------------------------------------------------------

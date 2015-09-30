@@ -1,0 +1,46 @@
+###################
+
+UC1 with Floodlight
+
+###################
+
+This readme helps the user to run Floodlight with the NetIDE ElementsConfigurator module, designed to manage the UC1 network,
+on top of a Mininet topology made by Georgios Katsikas. 
+
+Quick-start
+-----------
+
+1) Start Mininet: sh mininet.sh
+2) Start Floodlight: sh floodlight.sh
+3) Run traffic in Mininet to verify the setup:
+	- IntH ping DNS6 (works)
+	- IntH ping Web7 (works)
+	- ExtH ping IntH (doesn't work)
+	- ExtH ping DNS6 (doesn't work)
+
+
+
+Optional: Import the new NetIDE ElementsConfigurator module to Floodlight
+-------------------------------------------------------------------------
+
+If you want to undestand the whole process of adding a new module, e.g. a new app, 
+on top of Floodlight, follow this procedure:
+
+0) Download Floodlight (version 0.90) from the repo
+0a) Import the project in Eclipse, or modify the src code using an editor (the following steps refer to the second solution)
+1) Add a new Package: mkdir <floodlight_folder>/src/main/java/net/floodlightcontroller/netide
+2) Copy the java classes (ElementsConfigurator.java and IElementsConfiguratorService.java) in the new folder
+2a) Inspect the classes to understand how a module is done
+3) Modify the floodlight properties files:
+	- META-INF
+		- vim <floodlight_folder>/src/main/resources/META-INF/services/net.floodlightcontroller.core.module.IFloodlightModule
+		- add the line: "net.floodlightcontroller.netide.ElementsConfigurator"
+	- floodlightdefault.properties
+		- vim <floodlight_folder>/src/main/resources/floodlightdefault.properties
+		- add the line: "net.floodlightcontroller.netide.ElementsConfigurator,\" before "net.floodlightcontroller.perfmon.PktInProcessingTime,\"
+4) Compile the code:
+	- cd <floodlight_folder>
+	- ant
+5) Run the jar
+	- java -jar <floodlight_folder>/target/floodlight.jar
+

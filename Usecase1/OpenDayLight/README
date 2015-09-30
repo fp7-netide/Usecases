@@ -1,0 +1,35 @@
+###################
+
+UC1 with OpenDayLight
+
+###################
+
+This readme helps the user to run OpenDayLight with the NetIDE ElementsConfigurator module, designed to manage the UC1 network,
+on top of a Mininet topology made by Georgios Katsikas. 
+
+Prerequisites
+-------------
+
+The implementation of the UC1 use case has been achieved by modifying the code of the SDNHub Opendaylight Tutorial available here: https://github.com/sdnhub/SDNHub_Opendaylight_Tutorial
+The documentation of this tutorial is available here: http://sdnhub.org/tutorials/opendaylight/
+
+In order to use the code that implements the UC1 use case, please download the code with command: git clone https://github.com/sdnhub/SDNHub_Opendaylight_Tutorial.git
+After that, go into the root folder of the code and replace the file located at ./tutorial_L2_forwarding/src/main/java/org/opendaylight/controller/tutorial_L2_forwarding/internal/TutorialL2Forwarding.java
+with the TutorialL2Forwarding.java file provided with this README.
+
+Compile the code with command: mvn clean install
+
+Quick-start
+-----------
+
+1) Start Mininet: sh mininet.sh
+2) Start OpenDayLight: ./distribution/opendaylight/target/distribution.tutorial_L2_forwarding-1.0.0-SNAPSHOT-osgipackage/opendaylight/run.sh
+3) Run traffic in Mininet to verify the setup:
+	- IntH ping DNS6 (works)
+	- IntH ping Web7 (works)
+	- ExtH ping IntH (currently doesn't work because the R0 router is not configured)
+	- ExtH ping DNS6 (currently doesn't work because the R0 router is not configured)
+4) Within mininet you can verify the installed flowMods with command dpctl dump-flows
+5) The underlying physical topology is exposed by OpenDayLight through a web interface available at http://localhost:8080
+
+

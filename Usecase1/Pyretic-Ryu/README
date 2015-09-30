@@ -1,0 +1,14 @@
+######################
+Ryu Client for Pyretic
+######################
+
+This readme helps the user to run Pyretic modules and the Ryu-based of_client,
+on top of a Mininet topology.
+
+Quick-start: before running the scripts, you need to download the Pyretic's sources with command
+	     "git clone https://github.com/frenetic-lang/pyretic.git"
+	     
+1) Start Mininet: ./mininetStart.sh
+2) Start Pyretic: ./pyreticStart.sh ryu 
+
+In step 2), use the "pox" argument if you want to use the POX of_client.

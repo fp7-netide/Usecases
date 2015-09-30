@@ -1,0 +1,57 @@
+###################
+UC1 with Ryu
+###################
+
+This readme helps the user to run the ryu module designed to manage the UC1 network,
+on top of a Mininet topology.
+
+------------------------------------------------------------------------------------
+
+1) Download the latest Ryu code with command: git clone https://github.com/osrg/ryu.git
+2) Execute cd ryu; python ./setup.py install (this will install the ryu-manager tool)
+3) Start the application with command: ryu-manager UC1_DC.py
+4) Start Mininet: ./mininetStart.sh (thanks to George Katsikas for the script and the tests below)
+5) Start traffic in Mininet to verify the setup 
+	h2 iperf -p 80 -s &		    # Should be unreachable
+	h2 iperf -u -p 53 -s &
+	h3 iperf -p 80 -s &
+	h3 iperf -u -p 53 -s &		# Should be unreachable
+	h4 iperf -p 80 -s &		    # Should be unreachable
+	h4 iperf -u -p 53 -s &		# Should be unreachable
+
+
+	# Should fail
+	h1 ping h2
+	h1 ping h3
+	h1 ping h4
+	h2 ping h4
+	h3 ping h4
+	# Should pass
+	h2 ping h1
+	h2 ping h3
+	h3 ping h1
+	h3 ping h2
+	h4 ping h1
+	h4 ping h2
+	h4 ping h3
+
+
+	# should work
+	h4 iperf -u -t 5 -p 53 -c 10.0.1.17
+	h4 iperf -t 5 -p 80 -c 10.0.1.18
+	h2 iperf -t 5 -p 80 -c 10.0.1.18
+	h1 iperf -t 5 -p 80 -c 10.0.1.18
+	h1 iperf -u -t 5 -p 53 -c 10.0.1.17
+
+	# should fail
+	h1 iperf -t 5 -p 80 -c 10.0.1.17
+	h1 iperf -u -t 5 -p 53 -c 10.0.1.18
+	h1 iperf -t 5 -p 80 -c 10.0.1.32
+	h2 iperf -u -t 5 -p 53 -c 10.0.1.32
+	h2 iperf -t 5 -p 80 -c 10.0.1.32
+------------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------------
+--- Check Switch rules within mininet
+dpctl dump-flows
+------------------------------------------------------------------------------------
