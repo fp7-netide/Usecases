@@ -17,6 +17,9 @@ import org.openflow.protocol.action.OFAction;
 import org.openflow.protocol.action.OFActionOutput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils.Collections;
+
 import net.floodlightcontroller.core.IFloodlightProviderService;
 import net.floodlightcontroller.core.IOFSwitch;
 import net.floodlightcontroller.core.IOFSwitchListener;
@@ -24,6 +27,7 @@ import net.floodlightcontroller.core.module.FloodlightModuleContext;
 import net.floodlightcontroller.core.module.FloodlightModuleException;
 import net.floodlightcontroller.core.module.IFloodlightModule;
 import net.floodlightcontroller.core.module.IFloodlightService;
+import net.floodlightcontroller.firewall.FirewallRule;
 import net.floodlightcontroller.firewall.IFirewallService;
 import net.floodlightcontroller.packet.Ethernet;
 import net.floodlightcontroller.packet.IPv4;
@@ -88,18 +92,12 @@ public class ElementsConfigurator implements IFloodlightModule, IOFSwitchListene
 
 	@Override
 	public void addedSwitch(IOFSwitch sw) {
-		if (sw.getStringId().equalsIgnoreCase("00:00:00:00:00:00:00:01")) {
+		if (sw.getStringId().equalsIgnoreCase("00:00:00:00:00:00:00:01"))
 			configureRouter(sw);		
-		}	
-		else if (sw.getStringId().equalsIgnoreCase("00:00:00:00:00:00:00:04")) {
-			configureFW1(sw);			
-		}
-		else if (sw.getStringId().equalsIgnoreCase("00:00:00:00:00:00:00:05")){
+		else if (sw.getStringId().equalsIgnoreCase("00:00:00:00:00:00:00:04"))
+			configureFW1(sw);
+		else if (sw.getStringId().equalsIgnoreCase("00:00:00:00:00:00:00:05"))
 			configureFW2(sw);
-		}
-		else {
-			addDefaultAllow(sw);
-		}
 	}
 
 	@Override
@@ -120,7 +118,7 @@ public class ElementsConfigurator implements IFloodlightModule, IOFSwitchListene
 	}
 	
 	private void configureRouter(IOFSwitch sw) {
-		addDefaultDrop(sw);
+		
 	}
 	
 	private void configureFW1(IOFSwitch sw) {
@@ -164,13 +162,10 @@ public class ElementsConfigurator implements IFloodlightModule, IOFSwitchListene
     	OFFlowMod fm = new OFFlowMod();
     	OFMatch match = new OFMatch();
     	fm.setMatch(match);
-    	fm.setPriority((short) 350);
+    	fm.setPriority((short)100);
     	fm.setHardTimeout((short)0);
     	fm.setOutPort(OFPort.OFPP_NONE);
     	fm.setBufferId(OFPacketOut.BUFFER_ID_NONE);
-    	List<OFAction> acts = new ArrayList<OFAction>();
-    	fm.setActions(acts);
-    	fm.setLengthU(OFFlowMod.MINIMUM_LENGTH);
     	sendMsg(sw, fm);
     }
     
@@ -181,7 +176,7 @@ public class ElementsConfigurator implements IFloodlightModule, IOFSwitchListene
     	match.setDataLayerType(Ethernet.TYPE_ARP);
     	match.setWildcards(OFMatch.OFPFW_ALL & ~OFMatch.OFPFW_DL_TYPE);
     	fm.setMatch(match);
-    	fm.setPriority((short) 400);
+    	fm.setPriority((short)200);
     	fm.setHardTimeout((short)0);
     	fm.setBufferId(OFPacketOut.BUFFER_ID_NONE);
     	OFActionOutput act = new OFActionOutput();
@@ -201,7 +196,7 @@ public class ElementsConfigurator implements IFloodlightModule, IOFSwitchListene
     	match.setWildcards(OFMatch.OFPFW_ALL & ~OFMatch.OFPFW_DL_TYPE & 
     			~(OFMatch.OFPFW_NW_SRC_MASK & ((31+IPCIDRToPrefixBits(ip)[1]) << 8)));
     	fm.setMatch(match);
-    	fm.setPriority((short) 400);
+    	fm.setPriority((short)250);
     	fm.setHardTimeout((short)0);
     	fm.setBufferId(OFPacketOut.BUFFER_ID_NONE);
     	OFActionOutput act = new OFActionOutput();
@@ -224,7 +219,7 @@ public class ElementsConfigurator implements IFloodlightModule, IOFSwitchListene
     			~(OFMatch.OFPFW_NW_SRC_MASK & ((31+IPCIDRToPrefixBits(ip)[1]) << 8))
     			& ~OFMatch.OFPFW_NW_PROTO & ~OFMatch.OFPFW_TP_DST);
     	fm.setMatch(match);
-    	fm.setPriority((short) 500);
+    	fm.setPriority((short)250);
     	fm.setHardTimeout((short)0);
     	fm.setBufferId(OFPacketOut.BUFFER_ID_NONE);
     	OFActionOutput act = new OFActionOutput();
@@ -236,38 +231,7 @@ public class ElementsConfigurator implements IFloodlightModule, IOFSwitchListene
     	sendMsg(sw, fm);
     }
     
-    private void addDefaultAllow(IOFSwitch sw){
-        OFFlowMod fm = new OFFlowMod();
-        OFMatch match = new OFMatch();
-        match.setWildcards(OFMatch.OFPFW_ALL );
-        fm.setMatch(match);
-        fm.setPriority((short)350);
-        fm.setHardTimeout((short)0);
-        fm.setBufferId(OFPacketOut.BUFFER_ID_NONE);
-        OFActionOutput act = new OFActionOutput();
-        act.setPort(OFPort.OFPP_NORMAL.getValue());
-        List<OFAction> acts = new LinkedList<OFAction>();
-        acts.add(act);
-        fm.setActions(acts);
-        fm.setLengthU(OFFlowMod.MINIMUM_LENGTH + OFActionOutput.MINIMUM_LENGTH);
-        sendMsg(sw, fm);
-      }
-
-
-
-    private void clearFlowMods(IOFSwitch sw){
-        // Delete pre-existing flows with the same match, and output action port
-        // or outPort
-    	OFFlowMod fm = new OFFlowMod();
-    	OFMatch match = new OFMatch();
-    	match.setInputPort((short) OFPort.OFPP_CONTROLLER.getValue());
-        match.setWildcards(OFMatch.OFPFW_ALL & ~OFMatch.OFPFW_IN_PORT);
-        fm.setMatch(match).setCommand(OFFlowMod.OFPFC_MODIFY).setPriority((short)0);
-        fm.setLengthU(OFFlowMod.MINIMUM_LENGTH);
-        sendMsg(sw, fm);
-    }
-
-    private void sendMsg(IOFSwitch sw, OFMessage msg) {
+	private void sendMsg(IOFSwitch sw, OFMessage msg) {
 		List<OFMessage> msglist = new ArrayList<OFMessage>();
 		msglist.add(msg);
 		try {

@@ -141,9 +141,9 @@ def UC1_DC_Network():
 	DCTopo = DCTopology()
 
 	# Start mininet and load the topology
-	net = Mininet( topo=DCTopo, controller=None)
+	net = Mininet( topo=DCTopo, controller=RemoteController )
 	# In case of an out of the box controller, uncomment the following
-	net.addController( 'c0', controller=RemoteController, ip='127.0.0.1', port=6633 )
+	#net.addController( 'c0', controller=RemoteController, ip='192.168.255.254', port=6633 )
 	net.start()
 	# Get the devices
 	Devices = dict()
