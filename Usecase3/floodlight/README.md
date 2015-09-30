@@ -69,10 +69,15 @@ If you want to undestand the whole process of adding a new module, e.g. a new ap
 on top of Floodlight, follow this procedure:
 
 0) Download Floodlight (version 0.90) from the repo
+
 0a) Import the project in Eclipse, or modify the src code using an editor (the following steps refer to the second solution)
+
 1) Add a new Package: mkdir <floodlight_folder>/src/main/java/net/floodlightcontroller/monitor
+
 2) Copy the java classes (form Monitor sources) in the new folder
+
 2a) Inspect the classes to understand how a module is done
+
 3) Modify the floodlight properties files:
 	- META-INF
 		- vim <floodlight_folder>/src/main/resources/META-INF/services/net.floodlightcontroller.core.module.IFloodlightModule
@@ -85,8 +90,10 @@ on top of Floodlight, follow this procedure:
 			net.floodlightcontroller.monitor.internal.Monitor.update = 1000		(optional)
 			net.floodlightcontroller.monitor.internal.Monitor.latency = 1000	(optional)
 			net.floodlightcontroller.monitor.internal.Monitor.history = 10		(optional)
+
 4) Compile the code:
 	- cd <floodlight_folder>
 	- ant
+
 5) Run the jar
 	- java -jar <floodlight_folder>/target/floodlight.jar
