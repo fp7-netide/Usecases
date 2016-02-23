@@ -21,7 +21,7 @@ The operation will be declared a success if the code can run seamlessly on the t
 
 ###Installation
 
-This tutorial is used to run  the Use Case 3 network, with a Mininet topology over floodlight.
+This tutorial is used to run  the Use Case 3 network, with a Mininet topology with Floodlight as the HQ controller and Floodlight over OpenDaylight as the RB controller.
 
 To launch the Floodlight controller in the HQ:
 
