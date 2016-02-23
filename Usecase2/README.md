@@ -1,2 +1,19 @@
-This folder will contain the implementations of use case 2, the Integrated IT System
+#Use Case 2 : Integrated IT System
 
+##Use Case Presentation
+
+###Overview
+
+[TODO]
+
+###Illustration
+
+[TODO]
+
+###Installation
+
+[TODO]
+
+### Testing
+
+[TODO]
