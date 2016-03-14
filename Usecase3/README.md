@@ -34,7 +34,7 @@ To launch the Controller in the RB:
 ```
 1) Choose a shim available here: https://github.com/fp7-netide/Engine (this Use Case has been tested with the ODL shim)
 2) Follow the installation step in the Readme of the shim
-3) Install the Floodlight Backend following these instructions: https://github.com/fp7-netide/Engine/tree/master/floodlight-backend/v1.0
+3) Install the Floodlight Backend following these instructions: https://github.com/fp7-netide/Engine/tree/master/floodlight-backend/v1.2
 4) Install the Monitor application in Floodlight:
   a) Add a new Package: mkdir <floodlight_folder>/src/main/java/net/floodlightcontroller/monitor
   b) Copy the java classes (form Monitor sources) in the new folder
