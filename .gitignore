@@ -17,7 +17,6 @@ build/
 *.jar
 R.java
 *.dex
-*.dat
 *.lck
 *.ctrl
 
