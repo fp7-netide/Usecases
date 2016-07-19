@@ -1,4 +1,4 @@
-#UC1 with Pyretic (POX client)
+#UC2 with Pyretic (POX client)
 
 This readme helps the user to run the Pyretic module designed to manage the UC2 network, on top of a Mininet topology.
 
@@ -106,7 +106,7 @@ INFO:core:POX 0.1.0 (betta) is up.
 
 ## TODO
 
-* The code is in alpha version and has been tested with simple topologies. 
+* The code is in alpha version and has been tested with simple topologies (only one failed link allowed). 
 
 ## License
 
