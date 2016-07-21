@@ -252,6 +252,23 @@ class IITS_NetManager(app_manager.RyuApp):
                 if link.dst.dpid == HH5_ID:
                     self.out_port_table[SWITCH[SW4b_ID]][HOST[ipp5]] = link.src.port_no
 
+    def get_topology_data(self):
+        switch_list = get_switch(self.topology_api_app, None)
+        #switches=[switch.dp.id for switch in switch_list]
+        for switch in switch_list:
+             self.datapath_list.setdefault(switch.dp.id)
+             self.datapath_list[switch.dp.id] = switch.dp
+        links_list = get_link(self.topology_api_app, None)
+        #Add ports to out_port_table
+        self.update_system_info(links_list)
+
+        #print self.out_port_table
+        #print self.link_down_route
+
+        #Install flows in case of proactive behaviour
+        if PROACTIVE and self.all_switches_up():
+            self.install_all_flows()
+
     def arp_unicast(self, msg):
         datapath = msg.datapath
         ofproto = datapath.ofproto
@@ -417,7 +434,7 @@ class IITS_NetManager(app_manager.RyuApp):
 
         eth = pkt.get_protocol(ethernet.ethernet)
         if eth.ethertype == ether_types.ETH_TYPE_LLDP:
-            # ignore lldp packets
+            self.get_topology_data()
             return
         elif eth.ethertype == ether_types.ETH_TYPE_ARP:
             # handle ARPs
@@ -521,18 +538,3 @@ class IITS_NetManager(app_manager.RyuApp):
                             self.del_priority_flow(self.datapath_list[HH5_ID], ipp4, self.link_down_route[HH5_ID])
         else:
             self.logger.info("Illeagal port state %s %s", port_no, reason)
-
-    @set_ev_cls(event.EventSwitchEnter)
-    def get_topology_data(self, ev):
-        switch_list = get_switch(self.topology_api_app, None)
-        #switches=[switch.dp.id for switch in switch_list]
-        for switch in switch_list:
-             self.datapath_list.setdefault(switch.dp.id)
-             self.datapath_list[switch.dp.id] = switch.dp
-        links_list = get_link(self.topology_api_app, None)
-        #Add ports to out_port_table
-        self.update_system_info(links_list)
-        print self.out_port_table
-        print self.link_down_route
-        if PROACTIVE and self.all_switches_up():
-            self.install_all_flows()
