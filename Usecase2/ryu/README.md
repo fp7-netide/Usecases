@@ -72,4 +72,4 @@ uc2-ryu: 2016-7-20 Wen Juan Manuel Sánchez
 Maintenance by Juan Manuel Sánchez
 <juanmanuel.sanchez@telcaria.com>
 
-  * Tested with Ryu v3.23
+  * Tested with Ryu v3.27

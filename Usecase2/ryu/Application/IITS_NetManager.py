@@ -422,7 +422,7 @@ class IITS_NetManager(app_manager.RyuApp):
         elif eth.ethertype == ether_types.ETH_TYPE_ARP:
             # handle ARPs
             self.forward_arp(msg)
-        else:
+        elif eth.ethertype == ether_types.ETH_TYPE_IP:
             pkt_ipv4 = pkt.get_protocol(ipv4.ipv4)
             if pkt_ipv4.src == '0.0.0.0':
                 #ignore bootp packets
