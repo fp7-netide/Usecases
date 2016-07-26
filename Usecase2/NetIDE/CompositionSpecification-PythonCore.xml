@@ -1,0 +1,8 @@
+<?xml version="1.0" ?> 
+<CompositionSpecification>
+  <Modules>
+    <Module id="IITS_NetManager" loaderIdentification="IITS_NetManager.py">
+			<CallCondition events="packetIn" datapaths="0x1 0x2 0x3 0x4 0x05 0x06 0x07 0x08 0x0B 0x0C 0x0D 0x0E 0x0F"/>
+		</Module>
+  </Modules>
+</CompositionSpecification>
