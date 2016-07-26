@@ -23,6 +23,7 @@
 
 from os import popen
 import logging
+import sys
 
 # Mininet libraries
 from mininet.cli  import CLI
@@ -41,21 +42,26 @@ class IITSTopology (Topo):
 	Devices = dict()
 
 	### Topology constructor
-	def __init__ (self):
+	def __init__ (self, of_version):
 		## Initialize Topology
 		super(IITSTopology, self).__init__()
 
 		logger = logging.getLogger('NetIDE Logger')
 
+                #OpenFlow version
+                if of_version == 'of13':
+                    sconfig = {'protocols': 'OpenFlow13'}
+                else:
+                    sconfig = {'protocols': 'OpenFlow10'}
 		# Switches
-		SW1       = self.addSwitch('s1')
-		SW2       = self.addSwitch('s2')
-		SW3       = self.addSwitch('s3')
-        	SW4       = self.addSwitch('s4')
-    		SW1b      = self.addSwitch('s5')
-		SW2b      = self.addSwitch('s6')
-		SW3b      = self.addSwitch('s7')
-        	SW4b      = self.addSwitch('s8')
+		SW1       = self.addSwitch('s1', **sconfig)
+		SW2       = self.addSwitch('s2', **sconfig)
+		SW3       = self.addSwitch('s3', **sconfig)
+        	SW4       = self.addSwitch('s4', **sconfig)
+    		SW1b      = self.addSwitch('s5', **sconfig)
+		SW2b      = self.addSwitch('s6', **sconfig)
+		SW3b      = self.addSwitch('s7', **sconfig)
+        	SW4b      = self.addSwitch('s8', **sconfig)
 
 		# Hosts
 		H1        = self.addHost('h1')
@@ -65,11 +71,11 @@ class IITSTopology (Topo):
 		H5        = self.addHost('h5')
 
 		# Hypervisors
-		HH1        = self.addSwitch('s11')
-		HH2        = self.addSwitch('s12')
-                HH3        = self.addSwitch('s13')
-		HH4        = self.addSwitch('s14')
-                HH5	   = self.addSwitch('s15')
+		HH1        = self.addSwitch('s11', **sconfig)
+		HH2        = self.addSwitch('s12', **sconfig)
+                HH3        = self.addSwitch('s13', **sconfig)
+		HH4        = self.addSwitch('s14', **sconfig)
+                HH5	   = self.addSwitch('s15', **sconfig)
 
 		# Add links
                 #from hosts (H1,H2,H3,H4) to hosts-hypervisors (HH1,HH2,HH3,HH4)
@@ -178,12 +184,12 @@ def ConfigureLogger():
 	return logger
 
 ### Network Emulator method
-def UC2_IITS_Network():
+def UC2_IITS_Network(of_version):
 
 	logger.info('=================== Mininet Topology SetUp ===================')
 
 	# Create UC Topology instance
-	IITSTopo = IITSTopology()
+	IITSTopo = IITSTopology(of_version)
 
 	# Start mininet and load the topology
 	net = Mininet( topo=IITSTopo, controller=RemoteController, autoSetMacs = True )
@@ -212,11 +218,15 @@ def UC2_IITS_Network():
 ### Main
 #########################################################################################################
 if __name__ == '__main__':
+        if (len(sys.argv) > 1):
+           of_version = sys.argv[1]
+        else:
+           of_version = 'of10'
 	# Setup the logger
 	logger = ConfigureLogger()
 
 	# Start network
-	UC2_IITS_Network()
+	UC2_IITS_Network(of_version)
 #########################################################################################################
 
 
