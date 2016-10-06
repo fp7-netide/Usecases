@@ -52,13 +52,13 @@ SWITCH = {SW1_ID:0, SW2_ID:1, SW3_ID:2, SW4_ID:3, HH1_ID:4, HH2_ID:5, HH3_ID:6, 
 #Boolean variable to determine proactive/reactive behavior
 PROACTIVE = False
 
-class IITS_NetManager(app_manager.RyuApp):
+class IITS_NetManager_13(app_manager.RyuApp):
     OFP_VERSIONS = [ofproto_v1_3.OFP_VERSION]
 
     out_port_table = [[]]
 
     def __init__(self, *args, **kwargs):
-        super(IITS_NetManager, self).__init__(*args, **kwargs)
+        super(IITS_NetManager_13, self).__init__(*args, **kwargs)
         self.out_port_table_create(SWITCH, HOST)
         self.mac_to_port = {}
         self.link_down_route = {}
@@ -459,6 +459,7 @@ class IITS_NetManager(app_manager.RyuApp):
 
     @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
     def _packet_in_handler(self, ev):
+        #self.logger.info("Packet In")
         msg = ev.msg
         datapath = msg.datapath
         ofproto = datapath.ofproto

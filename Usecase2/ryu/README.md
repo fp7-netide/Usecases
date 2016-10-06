@@ -2,14 +2,14 @@
 
 This readme helps the user to run the Ryu application designed to manage the UC2 network, on top of a Mininet topology.
 
-The mininet script allows the user to choose between OpenFlow 1.0 (by default) and 1.3, but the application supports only OpenFlow 1.0.
+The mininet script allows the user to choose between OpenFlow 1.0 (by default) and 1.3, the IITS_NetManager application supports only OpenFlow 1.0, for OpenFlow 1.3 Use the IITS\_NetManager\_13 application as well as the CompositionFile-JavaCore\_13.xml.
 
 ## Installation
 
 Quick-start
 
 ```
-1) Start ryu application: ryu-manager Application/IITS_NetManager.py --observe-links
+1) Start ryu application: ryu-manager Application/IITS_NetManager[\_13].py --observe-links
 2) Start Mininet: ./mininetStart.sh [of13]
 3) Start traffic in Mininet to verify the default setup:
 	a) ICMP PING to/from all
@@ -64,7 +64,6 @@ instantiating app IITS_NetManager.py of IITS_NetManager
 
 * The application can handle a link down, but not a switch down.
 
-* Compatibility with OpenFlow 1.3.
 
 ## License
 
@@ -85,3 +84,7 @@ uc2-ryu: 2016-7-21 Wen Juan Manuel Sánchez
 uc2-ryu: 2016-7-26 Wen Juan Manuel Sánchez
 
   * Tested with Ryu v3.27, ryu-backend from ryu-backend-lldp branch, ryu-shim and core from master branch.
+
+uc2-ryu: 2016-10-6 Wen Juan Manuel Sánchez
+
+  * Tested with Ryu v3.27, and engine from master branch.
