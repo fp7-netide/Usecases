@@ -9,7 +9,7 @@ The mininet script allows the user to choose between OpenFlow 1.0 (by default) a
 Quick-start
 
 ```
-1) Start ryu application: ryu-manager Application/IITS_NetManager[\_13].py --observe-links
+1) Start ryu application: ryu-manager Application/IITS_NetManager[_13].py --observe-links
 2) Start Mininet: ./mininetStart.sh [of13]
 3) Start traffic in Mininet to verify the default setup:
 	a) ICMP PING to/from all
