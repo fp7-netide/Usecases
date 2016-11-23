@@ -501,7 +501,7 @@ class IITS_NetManager_13(app_manager.RyuApp):
             self.main_branch_state.setdefault(dpid, {})
             self.main_branch.setdefault(dpid, {})
             if port_no in self.main_branch_state[dpid]:
-                if ofp_port.state == ofp.OFPPS_LINK_DOWN and self.main_branch_state[dpid][port_no] == True:
+                if ofp_port.config == ofp.OFPPC_PORT_DOWN and ofp_port.state == ofp.OFPPS_LINK_DOWN and self.main_branch_state[dpid][port_no] == True:
                     self.main_branch_state[dpid][port_no] = False
                     #Switch to link_down behaviour and add priority flows
                     if dpid == SW1_ID:
