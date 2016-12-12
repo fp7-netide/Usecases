@@ -13,8 +13,11 @@ This use case describes an Integrated System (IS) which will typically be deploy
 ### Installation
 
 Currently, there are two versions of the UC implemented: one implemented in Pyretic for the first release of the NetIDE Engine (which followed the Pyretic intermediate protocol) and a second one implemented in Ryu for the second release of the NetIDE Engine (which follows the NetIDE intermediate protocol).
-Check each folder (pyretic/ryu) for each specific implementation and installation steps.
+
+Check each folder (```pyretic```/```ryu```) for each specific implementation and installation steps.
+
+The ```NetIDE``` folder contains the composition files required by the NetIDE Core when using the Engine.
 
 ### Testing
 
-This use case has been installed and experimented with using v0.2 of the NetIDE software. A particular focus was on the usability of the installation process and the ease of use of the topology editor, the main tool available at the time. Performance measurement is also an outstanding task. These topics will be addressed in the 3rd year of the NetIDE project.
+This use case has been installed and experimented with using v1.0 of the NetIDE software. A particular focus was on the usability of the installation process, the ease of use of the topology editor and the tools interfaces provided by the IDE. The ```examples/UC2``` folder in the IDE repository contains the full NetIDE project of UC2 (to be directly loaded in the IDE).
